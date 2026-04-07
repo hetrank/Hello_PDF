@@ -1,0 +1,4 @@
+__pycache__/
+sample_pdfs/
+vector_store/
+venv/
