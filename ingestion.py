@@ -82,7 +82,6 @@ def ingest_pdfs(pdf_paths):
 if __name__ == "__main__":
   pdf_paths = [
     r"C:\MY STUFF\DAIICT\GenAI\Research-Assistant\sample_pdfs\Challan - 2 Reciept.pdf",
-    r"C:\MY STUFF\DAIICT\GenAI\Research-Assistant\sample_pdfs\intro_comm_systems_madhow_jan2014b_0.pdf"
   ]
 
   ingest_pdfs(pdf_paths)
