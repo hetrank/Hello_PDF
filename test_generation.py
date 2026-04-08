@@ -9,7 +9,7 @@ retriever = get_retriever()
 end_retr = time.time()
 print(f"Got the retriever in {end_retr-start_retr}")
 
-query = "What is the offenders name?"
+query = "Is Kishorbhai an offender?"
 
 start_ans = time.time()
 answer = generate_answer(retriever, query)
