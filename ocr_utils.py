@@ -6,7 +6,7 @@ import os
 os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 
 from paddleocr import PaddleOCR
-from config import POPPLER_PATH
+from backend.config import POPPLER_PATH
 
 
 max_workers = max(1, os.cpu_count()//2)

@@ -1,4 +1,4 @@
-from ocr_utils_old import pdf_to_doc
+from backend.ocr_utils_old import pdf_to_doc
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings

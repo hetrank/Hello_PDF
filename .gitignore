@@ -4,3 +4,9 @@ vector_store/
 venv/
 config.py
 .env
+backend/__pycache__/
+backend/uploads/
+backend/vector_store/
+backend/app.db
+backend/.env
+backend/config.py
