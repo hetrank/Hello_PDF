@@ -46,7 +46,7 @@ Answer:
 
   llm = ChatGroq(
     model="llama-3.3-70b-versatile",
-    temperature=0.3
+    temperature=0.4
   )
 
   chain = prompt | llm

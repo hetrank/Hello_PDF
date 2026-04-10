@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Chat, Document
+from models import Chat, Document, Message
 from auth import get_current_user
 from generation import generate_answer
 import os
@@ -93,4 +93,28 @@ def query_chat(chat_id: int, question: str, current_user=Depends(get_current_use
         "answer": answer,
         "sources": sources
     }
+
+
+@router.post("/chat/{chat_id}/message")
+def save_message(chat_id: int, data: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    
+    user_msg = Message(chat_id=chat_id, role="user", content=data["question"])
+    bot_msg = Message(chat_id=chat_id, role="assistant", content=data["answer"])
+
+    db.add(user_msg)
+    db.add(bot_msg)
+    db.commit()
+
+    return {"message": "Saved"}
+
+
+@router.get("/chat/{chat_id}/messages")
+def get_messages(chat_id: int, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+
+    messages = db.query(Message).filter(Message.chat_id == chat_id).all()
+
+    return [
+        {"role": msg.role, "content": msg.content}
+        for msg in messages
+    ]
 

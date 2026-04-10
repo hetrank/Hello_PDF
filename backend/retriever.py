@@ -20,7 +20,7 @@ def get_retriever(persist_dir):
 
   base_retriever = vectordb.as_retriever(
     search_type="mmr",
-    search_kwargs={"k":6, "fetch_k" : 20}
+    search_kwargs={"k":10, "fetch_k" : 30}
   )
 
   llm = ChatGroq(
