@@ -3,6 +3,8 @@
 # =========================
 import streamlit as st
 import requests
+import json
+import time
 
 API_URL = "http://127.0.0.1:8000"
 
@@ -166,19 +168,54 @@ def chat_ui():
                 res = requests.post(
                     API_URL + f"/chat/{st.session_state.chat_id}/query",
                     headers=get_headers(),
-                    params={"question": question}
+                    params={"question": question},
+                    stream=True
                 )
 
                 if res.status_code == 200:
-                    data = res.json()
-                    answer = data["answer"]
-                    sources = data["sources"]
+                    full_response = ""
+                    sources = []
+                    buffer = ""
+                    collecting_sources = False
+                    sources_buffer = ""
 
-                    st.write(answer)
+                    placeholder = st.empty()
 
-                    with st.expander("Sources"):
-                        for s in sources:
-                            st.write(s)
+                    for chunk in res.iter_lines(decode_unicode=True):
+                        if chunk:
+                            text = chunk.decode("utf-8")
+
+                            if not collecting_sources:
+                                buffer += text
+
+                                if "__SOURCES__" in buffer:
+                                    parts = buffer.split("__SOURCES__")
+
+                                    full_response += parts[0]
+                                    placeholder.markdown(full_response + "▌")
+
+                                    collecting_sources = True
+                                    sources_buffer += parts[1]
+
+                                    time.sleep(0.01)
+                                
+                                else:
+                                    full_response += text
+                                    placeholder.markdown(full_response)
+                            else:
+                                sources_buffer += text
+
+                    if sources_buffer:
+                        try:
+                            sources = json.loads(sources_buffer)
+                        except Exception as e:
+                            print("JSON parse error: ", e)
+                            sources = []
+
+                    if sources:
+                        with st.expander("Sources"):
+                            for s in sources:
+                                st.write(s)
                     
                     #save to backend
                     requests.post(
@@ -186,13 +223,13 @@ def chat_ui():
                         headers=get_headers(),
                         json={
                             "question" : question,
-                            "answer" : answer
+                            "answer" : full_response
                         }
                     )
 
                     st.session_state.messages.append({
                         "role": "assistant",
-                        "content": answer
+                        "content": full_response
                     })
                 else:
                     st.error(res.text)

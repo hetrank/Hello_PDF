@@ -1,7 +1,8 @@
 from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage
 from retriever import get_retriever
 import os
+import json
 from dotenv import load_dotenv
 
 def generate_answer(chat_id, question):
@@ -19,8 +20,7 @@ def generate_answer(chat_id, question):
     for doc in docs
   ])
 
-  prompt = ChatPromptTemplate.from_template(
-    """
+  prompt =HumanMessage(content=f"""
 You are a helpful research assistant.
 
 Use ONLY the provided context to answer the question.
@@ -42,23 +42,21 @@ Question:
 
 Answer:
 """
-  )
+)
 
   llm = ChatGroq(
     model="llama-3.3-70b-versatile",
-    temperature=0.4
+    temperature=0.4,
+    streaming=True
   )
 
-  chain = prompt | llm
-
-  response = chain.invoke({
-    "context" : context, 
-    "question" : question
-  })
+  for chunk in llm.stream([prompt]):
+    if chunk.content:
+      yield chunk.content + "\n"
 
   sources = list(set([
     f"{doc.metadata.get('source')} (Page {doc.metadata.get('page')})"
     for doc in docs
   ]))
 
-  return response.content, sources
+  yield "\n\n__SOURCES__" + json.dumps(sources)

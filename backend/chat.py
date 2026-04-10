@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Chat, Document, Message
@@ -87,12 +88,11 @@ def upload_pdf(chat_id: int, file: UploadFile = File(...), current_user=Depends(
 @router.post("/chat/{chat_id}/query")
 def query_chat(chat_id: int, question: str, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     
-    answer, sources = generate_answer(chat_id, question)
+    def generator():
+        for token in generate_answer(chat_id, question):
+            yield token
 
-    return {
-        "answer": answer,
-        "sources": sources
-    }
+    return StreamingResponse(generator(), media_type="text/plain")
 
 
 @router.post("/chat/{chat_id}/message")
